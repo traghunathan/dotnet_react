@@ -24,6 +24,8 @@ namespace API
         }
         public IConfiguration Configuration { get; }
 
+        readonly string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
@@ -32,6 +34,18 @@ namespace API
                opt.UseSqlite(Configuration.GetConnectionString("DefaultConnection"));
                //opt.UseSqlite(Configuration.GetConnectionString("DefaultConnection"))
            });
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy(name: MyAllowSpecificOrigins,
+                    builder =>
+                    {
+                        builder.WithOrigins("http://localhost:3000")
+                        .AllowAnyHeader()
+                        .AllowAnyOrigin();
+                    }
+                    );
+            });
             services.AddControllers();
         }
 
@@ -46,6 +60,8 @@ namespace API
             //app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseCors(MyAllowSpecificOrigins);
 
             app.UseAuthorization();
 
